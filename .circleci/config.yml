@@ -1,0 +1,23 @@
+version: 2.1
+
+orbs:
+  trivy: gotooooo/trivy@dev:04ce8a0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:latest
+    steps:
+      - setup_remote_docker
+      - trivy/scan_an_image:
+          image: nginx:latest
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          no-progress: true
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - build
+
