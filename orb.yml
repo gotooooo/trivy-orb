@@ -5,25 +5,26 @@ commands:
   scan_an_image:
     description: scan an image
     steps:
-      - run: |
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /home/circleci/.cache:/root/.cache/ \
-          aquasec/trivy:<< parameters.version>> \
-          --template "<<parameters.template>>" \
-          --format "<<parameters.format>>" \
-          --severity "<<parameters.severity>>" \
-          --exit-code <<parameters.exit-code>> \
-          --no-progress=<<parameters.no-progress>> \
-          --ignore-unfixed=<<parameters.ignore-unfixed>> \
-          --vuln-type "<<parameters.vuln-type>>" \
-          --ignorefile "<<parameters.ignorefile>>" \
-          --timeout "<<parameters.timeout>>" \
-          --light=<<parameters.light>> \
-          --ignore-policy "<<parameters.ignore-policy>>" \
-          --list-all-pkgs=<<parameters.list-all-pkgs>> \
-          --skip-files "<<parameters.skip-files>>" \
-          --skip-dirs "<<parameters.skip-dirs>>" \
-          <<parameters.image>>
-
+      - run:
+          command: |
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /home/circleci/.cache:/root/.cache/ \
+            aquasec/trivy:<< parameters.version>> \
+            --template "<<parameters.template>>" \
+            --format "<<parameters.format>>" \
+            --severity "<<parameters.severity>>" \
+            --exit-code <<parameters.exit-code>> \
+            --no-progress=<<parameters.no-progress>> \
+            --ignore-unfixed=<<parameters.ignore-unfixed>> \
+            --vuln-type "<<parameters.vuln-type>>" \
+            --ignorefile "<<parameters.ignorefile>>" \
+            --timeout "<<parameters.timeout>>" \
+            --light=<<parameters.light>> \
+            --ignore-policy "<<parameters.ignore-policy>>" \
+            --list-all-pkgs=<<parameters.list-all-pkgs>> \
+            --skip-files "<<parameters.skip-files>>" \
+            --skip-dirs "<<parameters.skip-dirs>>" \
+            <<parameters.image>>
+          name: scan an image
     parameters:
       version:
         type: string
