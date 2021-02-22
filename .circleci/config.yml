@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  trivy: gotooooo/trivy@dev:04ce8a0
+  trivy: gotooooo/trivy@dev:58952a3
 
 jobs:
   build:
@@ -9,8 +9,13 @@ jobs:
       - image: circleci/python:latest
     steps:
       - setup_remote_docker
+      - run:
+          name: set image
+          command: |
+            export NAME="nginx:latest"
+            echo "export NAME=${NAME}" >> $BASH_ENV
       - trivy/scan_an_image:
-          image: nginx:latest
+          image: $NAME
           severity: HIGH,CRITICAL
           exit-code: 1
           no-progress: true
