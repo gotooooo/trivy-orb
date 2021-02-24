@@ -52,7 +52,19 @@ workflows:
           requires:
             - orb-tools/publish-dev
     unless: << pipeline.parameters.run-integration-tests >>
-  integration-test:
+  integration-test_deploy:
     jobs:
       - integration-test
+      - orb-tools/dev-promote-prod-from-commit-subject:
+          orb-name: gotooooo/trivy
+          context: circleci-orb-publishing
+          add-pr-comment: false
+          fail-if-semver-not-indicated: true
+          publish-version-tag: false
+          requires:
+            - integration-test
+          filters:
+            branches:
+              only:
+                - main
     when: << pipeline.parameters.run-integration-tests >>
