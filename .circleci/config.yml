@@ -55,6 +55,14 @@ workflows:
   integration-test_deploy:
     jobs:
       - integration-test
+      - hold-before-deploy:
+          type: approval
+          requires:
+            - integration-test
+          filters:
+            branches:
+              only:
+                - main
       - orb-tools/dev-promote-prod-from-commit-subject:
           orb-name: gotooooo/trivy
           context: circleci-orb-publishing
@@ -62,9 +70,5 @@ workflows:
           fail-if-semver-not-indicated: true
           publish-version-tag: false
           requires:
-            - integration-test
-          filters:
-            branches:
-              only:
-                - main
+            - hold-before-deploy
     when: << pipeline.parameters.run-integration-tests >>
