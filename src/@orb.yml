@@ -1,0 +1,5 @@
+version: 2.1
+
+description:  Trivy scanner orb
+display:
+  source_url: "https://github.com/gotooooo/trivy-orb"

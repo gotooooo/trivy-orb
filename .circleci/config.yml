@@ -1,12 +1,26 @@
 version: 2.1
 
 orbs:
-  trivy: gotooooo/trivy@dev:58952a3
+  trivy: gotooooo/trivy@<< pipeline.parameters.dev-orb-version >>
+  orb-tools: circleci/orb-tools@10.0.3
+
+parameters:
+  run-integration-tests:
+    description: An internal flag to prevent integration test from running before a development version has been created.
+    type: boolean
+    default: false
+  dev-orb-version:
+    description: >
+      The development version of the orb to test.
+      This value is automatically adjusted by the "trigger-integration-tests-workflow" job to correspond with the specific version created by the commit and should not be edited.
+      A "dev:alpha" version must exist for the initial pipeline run.
+    type: string
+    default: "dev:alpha"
 
 jobs:
-  build:
+  integration-test:
     docker:
-      - image: circleci/python:latest
+      - image: cimg/base:stable
     steps:
       - setup_remote_docker
       - run:
@@ -17,12 +31,44 @@ jobs:
       - trivy/scan_an_image:
           image: $NAME
           severity: HIGH,CRITICAL
-          exit-code: 1
+          exit-code: 0
           no-progress: true
 
 workflows:
   version: 2
-  workflow:
+  test-pack:
     jobs:
-      - build
-
+      - orb-tools/lint
+      - orb-tools/pack
+      - orb-tools/publish-dev:
+          orb-name: gotooooo/trivy
+          context: circleci-orb-publishing
+          requires:
+            - orb-tools/lint
+            - orb-tools/pack
+      - orb-tools/trigger-integration-tests-workflow:
+          name: trigger-integration-dev
+          context: circleci-orb-publishing
+          requires:
+            - orb-tools/publish-dev
+    unless: << pipeline.parameters.run-integration-tests >>
+  integration-test_deploy:
+    jobs:
+      - integration-test
+      - hold-before-deploy:
+          type: approval
+          requires:
+            - integration-test
+          filters:
+            branches:
+              only:
+                - main
+      - orb-tools/dev-promote-prod-from-commit-subject:
+          orb-name: gotooooo/trivy
+          context: circleci-orb-publishing
+          add-pr-comment: false
+          fail-if-semver-not-indicated: true
+          publish-version-tag: false
+          requires:
+            - hold-before-deploy
+    when: << pipeline.parameters.run-integration-tests >>
