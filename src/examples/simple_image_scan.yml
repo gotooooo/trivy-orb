@@ -1,0 +1,21 @@
+description: simple image scan
+usage:
+  version: 2.1
+  orbs:
+    trivy: gotooooo/trivy@0.0.2
+  jobs:
+    build:
+      docker:
+        - image: cimg/base:stable
+      steps:
+        - setup_remote_docker
+        - trivy/scan_an_image:
+            image: nginx:latest
+            severity: HIGH,CRITICAL
+            exit-code: 1
+            no-progress: true
+  workflows:
+    version: 2
+    use-my-orb:
+      jobs:
+        - build
